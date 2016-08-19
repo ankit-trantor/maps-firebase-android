@@ -11,6 +11,12 @@ import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class LocationService extends Service {
     private static final String TAG = LocationService.class.getSimpleName();
     private LocationManager mLocationManager = null;
@@ -28,6 +34,12 @@ public class LocationService extends Service {
 
         @Override
         public void onLocationChanged(Location location) {
+            SimpleDateFormat s = new SimpleDateFormat("ddMMyyyyhhmmss");
+            String timestamp = s.format(new Date());
+            UserLocation userLocation=new UserLocation(location.getLatitude(),location.getLongitude(),timestamp);
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            final DatabaseReference myRef = database.getReference("location");
+            myRef.child("kraiba").push().setValue(userLocation);
             Log.e(TAG, "onLocationChanged: " + location);
             mLastLocation.set(location);
         }
