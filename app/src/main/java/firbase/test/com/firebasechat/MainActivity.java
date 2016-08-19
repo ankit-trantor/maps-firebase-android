@@ -1,5 +1,7 @@
 package firbase.test.com.firebasechat;
 
+import android.app.Service;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -29,6 +31,12 @@ public class MainActivity extends AppCompatActivity {
         final EditText messageTxt= (EditText) findViewById(R.id.messageTxt);
         ListView messageList= (ListView) findViewById(R.id.messagesList);
 
+        if(!LocationService.isRunning){
+            Intent intent = new Intent(this, LocationService.class);
+            startService(intent);
+
+
+        }
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference myRef = database.getReference("message");
 
