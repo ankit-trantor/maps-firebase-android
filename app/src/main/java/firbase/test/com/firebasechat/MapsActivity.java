@@ -4,21 +4,32 @@ import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.annotation.DrawableRes;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Property;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.ImageView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -28,6 +39,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -132,11 +144,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             markerHashMap.get(username).setPosition(position);
         }
         else{
+            String url = "https://yt3.ggpht.com/-oiRlQjkYh08/AAAAAAAAAAI/AAAAAAAAAAA/PacDm-F0yPw/s900-c-k-no-rj-c0xffffff/photo.jpg";
             Marker marker= mMap.addMarker(new MarkerOptions()
                     .position(position)
-                    .title(username));
+                    .title(username)
+                    .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmapFromView(url)))
+            );
             markerHashMap.put(username,marker);
         }
     }
+
+    private Bitmap getMarkerBitmapFromView(String url) {
+
+        View customMarkerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.view_custom_marker, null);
+        ImageView markerImageView = (ImageView) customMarkerView.findViewById(R.id.profile_image);
+//        markerImageView.setImageResource(resId);
+        Picasso.with(MapsActivity.this).load(url).into(markerImageView);
+        customMarkerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        customMarkerView.layout(0, 0, customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight());
+        customMarkerView.buildDrawingCache();
+        Bitmap returnedBitmap = Bitmap.createBitmap(customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(returnedBitmap);
+        canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_IN);
+        Drawable drawable = customMarkerView.getBackground();
+        if (drawable != null)
+            drawable.draw(canvas);
+        customMarkerView.draw(canvas);
+        return returnedBitmap;
+    }
+
 
 }
